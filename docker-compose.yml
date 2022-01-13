@@ -1,0 +1,25 @@
+version: "3.6"
+
+services:
+  golang:
+    image: golang:1.17
+    tty: true
+    working_dir: /app
+    ports:
+      - 80:80
+    volumes:
+      - ./:/app:Z
+    depends_on:
+      - postgres
+
+  postgres:
+    image: postgres:14.1
+    restart: always
+    ports:
+      - 5432:5432
+    volumes:
+      - ./:/db
+    environment:
+      POSTGRES_DB: gorest
+      POSTGRES_PASSWORD: gorest
+      POSTGRES_USER: gorest
