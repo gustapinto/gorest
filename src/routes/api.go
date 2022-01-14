@@ -8,8 +8,13 @@ import (
 func Api() {
 	router := gin.Default()
 
-	router.POST("/api/books", controller.CreateBook)
 	router.GET("/api/books", controller.GetAllBooks)
+	router.POST("/api/books", controller.CreateBook)
+	router.GET("/api/books/:id", controller.GetBook)
+	router.PUT("/api/books/:id", controller.UpdateBook)
+	router.DELETE("/api/books/:id", controller.DeleteBook)
 
-	router.Run("0.0.0.0:80")
+	if err := router.Run("0.0.0.0:80"); err != nil {
+		panic(err)
+	}
 }
