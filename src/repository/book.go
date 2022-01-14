@@ -1,11 +1,8 @@
 package repository
 
 import (
-	"database/sql"
-	"fmt"
-	_ "github.com/jackc/pgx/v4/stdlib"
+	"gorest/src/database"
 	"log"
-	"os"
 )
 
 type Book struct {
@@ -15,18 +12,7 @@ type Book struct {
 }
 
 func AddBook(book *Book) {
-	connString := fmt.Sprintf("host=%s port=%d user=%s password=%s dbname=%s sslmode=disable",
-		"postgres", 5432, os.Getenv("POSTGRES_USER"), os.Getenv("POSTGRES_PASSWORD"),
-		os.Getenv("POSTGRES_DB"))
-
-	log.Println(connString)
-
-	db, err := sql.Open("pgx", connString)
-
-	if err != nil {
-		log.Fatal(err)
-	}
-
+	db := database.ConnectPostgres()
 	defer db.Close()
 
 	query := `insert into "books" ("title", "author") values ($1, $2)`
@@ -34,4 +20,30 @@ func AddBook(book *Book) {
 	if _, err := db.Exec(query, book.Title, book.Author); err != nil {
 		log.Fatal(err)
 	}
+}
+
+func GetAllBooks() []Book {
+	var books []Book
+
+	db := database.ConnectPostgres()
+	defer db.Close()
+
+	rows, err := db.Query("select * from books")
+
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	for rows.Next() {
+		var id int
+		var title, author string
+
+		if err := rows.Scan(&id, &title, &author); err != nil {
+			log.Fatal(err)
+		}
+
+		books = append(books, Book{id, title, author})
+	}
+
+	return books
 }

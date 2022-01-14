@@ -19,3 +19,9 @@ func CreateBook(ctx *gin.Context) {
 
 	ctx.IndentedJSON(http.StatusCreated, newBook)
 }
+
+func GetAllBooks(ctx *gin.Context) {
+	books := repository.GetAllBooks()
+
+	ctx.IndentedJSON(http.StatusOK, books)
+}
