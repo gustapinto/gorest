@@ -11,15 +11,20 @@ services:
       - ./:/app:Z
     depends_on:
       - postgres
+    env_file:
+      - .env
+    networks:
+      - backend
 
   postgres:
     image: postgres:14.1
     restart: always
     ports:
       - 5432:5432
-    volumes:
-      - ./:/db
-    environment:
-      POSTGRES_DB: gorest
-      POSTGRES_PASSWORD: gorest
-      POSTGRES_USER: gorest
+    env_file:
+      - .env
+    networks:
+      - backend
+
+networks:
+  backend:
