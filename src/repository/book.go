@@ -13,7 +13,11 @@ type Book struct {
 
 func AddBook(book *Book) {
 	db := database.ConnectPostgres()
-	defer db.Close()
+	defer func() {
+		if err := db.Close(); err != nil {
+			log.Println(err)
+		}
+	}()
 
 	query := `insert into "books" ("title", "author") values ($1, $2)`
 
@@ -26,9 +30,13 @@ func GetAllBooks() []Book {
 	var books []Book
 
 	db := database.ConnectPostgres()
-	defer db.Close()
+	defer func() {
+		if err := db.Close(); err != nil {
+			log.Println(err)
+		}
+	}()
 
-	rows, err := db.Query("select * from books")
+	rows, err := db.Query("select * from books order by id")
 
 	if err != nil {
 		log.Fatal(err)
@@ -56,24 +64,15 @@ func GetBookById(bookId string) (*Book, error) {
 		}
 	}()
 
-	rows, err := db.Query("select * from books where id=$1", bookId)
+	row := db.QueryRow("select * from books where id=$1", bookId)
 
-	if err != nil {
-		log.Fatal(err)
+	book := &Book{}
+
+	if err := row.Scan(&book.Id, &book.Title, &book.Author); err != nil {
+		return nil, err
+	} else {
+		return book, nil
 	}
-
-	for rows.Next() {
-		var id int
-		var title, author string
-
-		if err := rows.Scan(&id, &title, &author); err != nil {
-			return nil, err
-		}
-
-		return &Book{id, title, author}, nil
-	}
-
-	return nil, nil
 }
 
 func UpdateBook(bookId string, newBook *Book) error {

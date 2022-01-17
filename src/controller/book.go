@@ -1,6 +1,7 @@
 package controller
 
 import (
+	"database/sql"
 	"github.com/gin-gonic/gin"
 	"gorest/src/repository"
 	"net/http"
@@ -27,9 +28,11 @@ func GetBook(ctx *gin.Context) {
 	bookId := ctx.Param("id")
 
 	if book, err := repository.GetBookById(bookId); err != nil {
-		ctx.IndentedJSON(http.StatusInternalServerError, gin.H{"Message": err.Error()})
-	} else if book == nil {
-		ctx.IndentedJSON(http.StatusNotFound, gin.H{"Message": "Book not found"})
+		if err == sql.ErrNoRows {
+			ctx.IndentedJSON(http.StatusNotFound, gin.H{"Message": "Book not found"})
+		} else {
+			ctx.IndentedJSON(http.StatusInternalServerError, gin.H{"Message": err.Error()})
+		}
 	} else {
 		ctx.IndentedJSON(http.StatusOK, book)
 	}
