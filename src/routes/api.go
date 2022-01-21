@@ -1,20 +1,15 @@
 package routes
 
 import (
-	"github.com/gin-gonic/gin"
 	"gorest/src/controller"
+
+	"github.com/gin-gonic/gin"
 )
 
-func Api() {
-	router := gin.Default()
-
+func Api(router *gin.Engine) {
 	router.GET("/api/books", controller.GetAllBooks)
 	router.POST("/api/books", controller.CreateBook)
 	router.GET("/api/books/:id", controller.GetBook)
 	router.PUT("/api/books/:id", controller.UpdateBook)
 	router.DELETE("/api/books/:id", controller.DeleteBook)
-
-	if err := router.Run("0.0.0.0:80"); err != nil {
-		panic(err)
-	}
 }
